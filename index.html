@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f8eef1">
+<title>Mi Rincón Lector</title>
+<style>
+:root{
+ --bg:#fbf7f4;--paper:#fffdfb;--ink:#47363d;--muted:#927e87;--line:#eadfe3;
+ --rose:#d99caf;--rose2:#f5e2e8;--wine:#885567;--lav:#e8e1f1;--sage:#e3ece4;
+ --shadow:0 8px 28px rgba(96,62,78,.07);--radius:18px;--font: "Georgia", "Times New Roman", serif;
+}
+[data-theme="dark"]{--bg:#211c22;--paper:#2c252d;--ink:#f4e9ef;--muted:#c2aab8;--line:#493d49;--rose:#bb819b;--rose2:#45313d;--wine:#d0a0b5;--lav:#403649;--sage:#334039;--shadow:0 8px 28px rgba(0,0,0,.18)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{border:0;cursor:pointer}
+.app{min-height:100vh;display:flex}
+.sidebar{width:245px;padding:26px 18px;background:var(--paper);border-right:1px solid var(--line);position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:10;overflow-y:auto;overscroll-behavior:contain}
+.brand{display:flex;gap:10px;align-items:center;padding:6px 8px 24px}
+.brandmark{height:40px;width:40px;border-radius:14px;background:var(--rose2);display:grid;place-items:center;font-size:21px}
+.brand h1{font:600 17px var(--font);margin:0}
+.brand small{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.nav{display:flex;flex-direction:column;gap:5px;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 2px 12px;scrollbar-width:thin;scrollbar-color:var(--rose) transparent}
+.nav button,.mobile-nav button{background:transparent;text-align:left;border-radius:12px;padding:11px 13px;color:var(--muted);display:flex;align-items:center;gap:12px}
+.nav button.active,.nav button:hover{background:var(--rose2);color:var(--wine)}
+.nav .navicon{width:20px;text-align:center}
+.navgroup{margin:16px 10px 6px;font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted)}
+.sidebar-bottom{margin-top:12px;border-top:1px solid var(--line);padding-top:15px;flex-shrink:0}
+.profile-chip{display:flex;gap:10px;align-items:center;padding:8px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--lav);display:grid;place-items:center}
+.main{margin-left:245px;width:calc(100% - 245px);padding:34px clamp(18px,4vw,54px) 60px;max-width:1600px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
+.topbar h2{font:500 28px var(--font);margin:0}
+.topbar p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn{border-radius:12px;padding:10px 15px;background:var(--rose2);color:var(--wine);font-weight:600}
+.btn.primary{background:var(--wine);color:white}
+.btn.ghost{background:var(--paper);border:1px solid var(--line);color:var(--ink)}
+.btn.small{padding:7px 10px;font-size:12px}
+.iconbtn{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.panel h3{margin:0 0 14px;font:500 20px var(--font)}
+.panel h4{margin:0 0 7px;font-size:14px}
+.muted{color:var(--muted)}
+.grid{display:grid;gap:16px}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.hero{background:linear-gradient(125deg,var(--rose2),var(--lav));border:1px solid var(--line);border-radius:22px;padding:26px;display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px}
+.hero h2{font:500 26px var(--font);margin:0 0 8px}
+.hero p{margin:0;color:var(--muted)}
+.hero .hero-art{font-size:58px;opacity:.65}
+.stat{padding:18px}
+.stat .big{font:500 30px var(--font);margin:6px 0}
+.stat .label{font-size:12px;color:var(--muted)}
+.stat .emoji{font-size:20px}
+.progress{height:8px;background:var(--rose2);border-radius:10px;overflow:hidden;margin:9px 0}
+.progress span{height:100%;display:block;background:var(--rose);border-radius:10px}
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:17px}
+.book-card{position:relative;cursor:pointer;min-width:0}
+.cover{aspect-ratio:2/3;border-radius:9px;background:linear-gradient(145deg,#e8d9e2,#cba6ba);box-shadow:0 7px 15px rgba(74,48,66,.15);display:flex;align-items:center;justify-content:center;text-align:center;padding:13px;color:#5b3f50;font:500 15px var(--font);overflow:hidden;position:relative}
+.cover:before{content:"";position:absolute;inset:8px;border:1px solid rgba(255,255,255,.55);border-radius:5px}
+.cover span{position:relative;z-index:1}
+.cover.c2{background:linear-gradient(140deg,#e9dfd4,#b99e8a);color:#584638}
+.cover.c3{background:linear-gradient(140deg,#e2e4f0,#a6aac8);color:#414660}
+.cover.c4{background:linear-gradient(140deg,#e4ede3,#9eb9a2);color:#3e5c44}
+.cover.c5{background:linear-gradient(140deg,#f2e5d5,#d2b17c);color:#654f2b}
+.cover.c6{background:linear-gradient(140deg,#ead9e8,#b996b7);color:#614760}
+.cover.c7{background:linear-gradient(140deg,#f0d8dd,#bd8b99);color:#5e3945}
+.cover.c8{background:linear-gradient(140deg,#dce9ed,#91b3bf);color:#355461}
+.book-title{font-size:13px;font-weight:600;margin-top:8px;line-height:1.35}
+.book-author{font-size:12px;color:var(--muted);margin-top:3px}
+.book-meta{font-size:11px;color:var(--muted);margin-top:5px}
+.favorite{position:absolute;right:7px;top:7px;background:rgba(255,255,255,.82);border-radius:50%;width:27px;height:27px;color:#aa6c85;display:grid;place-items:center}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.empty .flower{font-size:36px;margin-bottom:10px}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:24px 0 14px}
+.section-head h3{margin:0;font:500 21px var(--font)}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+input,select,textarea{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:10px 12px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--rose)}
+.search{min-width:210px;flex:1;max-width:380px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:99px;background:var(--paper);padding:7px 12px;font-size:12px;color:var(--muted)}
+.chip.active{background:var(--rose2);color:var(--wine);border-color:transparent}
+.shelf{background:linear-gradient(180,#f5ece7,#e5d8d2);border-radius:17px;padding:20px;min-height:220px}
+[data-theme="dark"] .shelf{background:linear-gradient(180,#40363c,#332b32)}
+.shelf-row{height:130px;border-bottom:13px solid #b79a8d;display:flex;align-items:flex-end;padding:0 8px 5px;gap:4px;overflow-x:auto}
+[data-theme="dark"] .shelf-row{border-color:#6d5550}
+.shelf-book{width:32px;min-width:25px;height:105px;border-radius:4px 4px 1px 1px;display:flex;align-items:center;justify-content:center;color:#fff;font:12px var(--font);writing-mode:vertical-rl;transform:rotate(180deg);cursor:grab;padding:5px;box-shadow:inset 3px 0 rgba(255,255,255,.15)}
+.shelf-book.horizontal{width:80px;height:28px;min-width:80px;writing-mode:horizontal-tb;transform:none}
+.modal-backdrop{position:fixed;inset:0;background:rgba(35,23,32,.45);display:none;align-items:center;justify-content:center;z-index:30;padding:16px}
+.modal-backdrop.show{display:flex}
+.modal{background:var(--paper);border-radius:22px;width:min(650px,100%);max-height:92vh;overflow:auto;padding:24px;box-shadow:0 20px 70px rgba(0,0,0,.25)}
+.modal h2{font:500 24px var(--font);margin:0 0 17px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.formgrid label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:5px}
+.formgrid .full{grid-column:1/-1}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
+textarea{min-height:100px;resize:vertical}
+.list-item{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding:12px 0}
+.list-item:last-child{border-bottom:0}
+.timer{text-align:center;padding:24px}
+.timer-display{font:500 50px var(--font);letter-spacing:2px;margin:18px}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.calendar div{text-align:center;padding:9px 4px;border-radius:9px;font-size:12px}
+.calendar .head{color:var(--muted);font-weight:600}
+.calendar .read{background:var(--rose2);color:var(--wine)}
+.note-card{border-left:3px solid var(--rose);padding:12px 14px;background:var(--bg);border-radius:8px;margin-bottom:10px}
+.mobile-nav{display:none}
+.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;z-index:50;opacity:0;transition:.2s;pointer-events:none}
+.toast.show{opacity:1}
+.tag{font-size:10px;padding:4px 7px;background:var(--lav);border-radius:7px;color:var(--muted)}
+.book-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+@media(max-width:900px){.sidebar{width:210px}.main{margin-left:210px;width:calc(100% - 210px)}.grid.four{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){
+ .sidebar{display:none}.main{margin:0;width:100%;padding:20px 15px 95px}
+ .topbar h2{font-size:24px}.topbar{align-items:flex-start}
+ .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:15;background:var(--paper);border-top:1px solid var(--line);justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
+ .mobile-nav button{padding:8px 6px;display:flex;flex-direction:column;gap:3px;text-align:center;font-size:10px;flex:1}
+ .mobile-nav button.active{color:var(--wine)}
+ .grid.two,.grid.three{grid-template-columns:1fr}
+ .hero{padding:20px}.hero h2{font-size:22px}.hero-art{display:none}
+ .formgrid{grid-template-columns:1fr}.formgrid .full{grid-column:auto}
+ .book-grid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:13px}
+ .panel{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brandmark">✿</div><div><h1>Mi Rincón Lector</h1><small>un pequeño mundo entre páginas</small></div></div>
+  <nav class="nav" id="sideNav">
+    <button class="active" data-page="inicio"><span class="navicon">⌂</span>Inicio</button>
+    <button data-page="biblioteca"><span class="navicon">▤</span>Biblioteca</button>
+    <button data-page="seguimiento"><span class="navicon">◷</span>Seguimiento</button>
+    <button data-page="diario"><span class="navicon">✎</span>Diario lector</button>
+    <button data-page="mimundo"><span class="navicon">✿</span>Mi mundo lector</button>
+    <button data-page="estadisticas"><span class="navicon">▥</span>Estadísticas</button>
+    <div class="navgroup">Organiza tu mundo</div>
+    <button data-page="estanteria"><span class="navicon">▥</span>Estantería virtual</button>
+    <button data-page="retos"><span class="navicon">☆</span>Retos y logros</button>
+    <button data-page="rankings"><span class="navicon">♡</span>Rankings y crushes</button>
+    <button data-page="wishlist"><span class="navicon">♧</span>Lista de deseos</button>
+    <button data-page="calendario"><span class="navicon">▦</span>Calendario</button>
+    <button data-page="papelera"><span class="navicon">⌫</span>Papelera</button>
+    <button data-page="config"><span class="navicon">⚙</span>Configuración</button>
+  </nav>
+  <div class="sidebar-bottom"><div class="profile-chip"><div class="avatar">♡</div><div><b>Mi espacio privado</b><small class="muted">solo para ti</small></div></div></div>
+</aside>
+<main class="main">
+  <div class="topbar"><div><h2 id="pageTitle">Inicio</h2><p id="pageSubtitle">Tu mundo lector, a tu ritmo.</p></div><div class="actions"><button class="btn ghost" onclick="openAddBook()">＋ Añadir libro</button></div></div>
+  <div id="content"></div>
+</main>
+<nav class="mobile-nav" id="mobileNav">
+<button class="active" data-page="inicio"><span>⌂</span>Inicio</button><button data-page="biblioteca"><span>▤</span>Biblioteca</button><button data-page="seguimiento"><span>◷</span>Seguimiento</button><button data-page="diario"><span>✎</span>Diario</button><button data-page="moremenu"><span>✿</span>Más</button>
+</nav>
+</div>
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const KEY='mi-rincon-lector-v1';const BACKUP_KEY='mi-rincon-lector-local-recovery-v1';
+const initial={books:[],notes:[],wishlist:[],trash:[],challenges:[],rankings:[],crushes:[],sessions:[],streakDays:[],shelf:[],settings:{theme:'light',goal:24},awards:[]};
+let data=load(),page='inicio',filter='Todos',timerSecs=0,timerInterval=null,timerBook=null;
+function load(){try{const primary=localStorage.getItem(KEY);if(primary){return {...initial,...JSON.parse(primary)}}const recovery=localStorage.getItem(BACKUP_KEY);if(recovery){return {...initial,...JSON.parse(recovery)}}return structuredClone(initial)}catch(e){try{const recovery=localStorage.getItem(BACKUP_KEY);return recovery?{...initial,...JSON.parse(recovery)}:structuredClone(initial)}catch{return structuredClone(initial)}}}
+function save(){const snapshot=JSON.stringify(data);localStorage.setItem(KEY,snapshot);try{localStorage.setItem(BACKUP_KEY,snapshot)}catch(e){console.warn('No se pudo guardar respaldo local adicional',e)}}
+function toast(t){let el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
+function setPage(p){page=p;filter='Todos';document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===p));render()}
+const pageNames={inicio:'Inicio',biblioteca:'Biblioteca',seguimiento:'Seguimiento',diario:'Diario lector',mimundo:'Mi mundo lector',estadisticas:'Estadísticas',estanteria:'Estantería virtual',retos:'Retos y logros',rankings:'Rankings y crushes',wishlist:'Lista de deseos',calendario:'Calendario lector',papelera:'Papelera',config:'Configuración'};
+const subs={inicio:'Tu mundo lector, a tu ritmo.',biblioteca:'Todos tus libros en un solo lugar.',seguimiento:'Registra tus páginas, sesiones y avances.',diario:'Un espacio privado para tus pensamientos.',mimundo:'Detalles de tu universo literario.',estadisticas:'Tus lecturas, convertidas en recuerdos.',estanteria:'Organiza tus libros como te guste.',retos:'Pequeños retos, grandes historias.',rankings:'Tus personajes y favoritos.',wishlist:'Libros que esperan su momento.',calendario:'Tu año entre páginas.',papelera:'Puedes restaurar lo que eliminaste.',config:'Ajusta tu espacio a tu gusto.'};
+function render(){document.getElementById('pageTitle').textContent=pageNames[page]||'Mi Rincón Lector';document.getElementById('pageSubtitle').textContent=subs[page]||'';let c=document.getElementById('content');({inicio:home,biblioteca:library,seguimiento:tracking,diario:diary,mimundo:more,estadisticas:stats,estanteria:shelf,retos:challenges,rankings:rankings,wishlist:wishlist,calendario:calendar,papelera:trash,config:settings}[page]||home)(c)}
+function bookCover(b){let cl='c'+((b.color||1)%8+1);return b.coverUrl?`<div class="cover ${cl}" style="padding:0;background:#eee"><img src="${esc(b.coverUrl)}" alt="Portada de ${esc(b.title)}" style="width:100%;height:100%;object-fit:cover;border-radius:9px" onerror="this.parentElement.innerHTML='<span>${esc(b.title||'Libro')}</span>'"></div>`:`<div class="cover ${cl}"><span>${esc(b.title||'Libro')}</span></div>`}
+function bookCard(b){return `<div class="book-card" onclick="bookDetail('${b.id}')">${bookCover(b)}${b.favorite?'<div class="favorite">♥</div>':''}<div class="book-title">${esc(b.title)}</div><div class="book-author">${esc(b.author||'Autor desconocido')}</div><div class="book-meta">${esc(b.status)}${b.pages?` · ${b.current||0}/${b.pages} pág.`:''}</div></div>`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function pct(b){return b.pages?Math.min(100,Math.round((Number(b.current||0)/Number(b.pages))*100)):0}
+function finished(){return data.books.filter(b=>b.status==='Leído')}
+function totalPages(){return data.books.reduce((n,b)=>n+(Number(b.current)||0),0)}
+function home(c){
+ let current=data.books.filter(b=>b.status==='Leyendo'),done=finished(),goal=Number(data.settings.goal||24),p=done.length/goal*100;
+ c.innerHTML=`<div class="hero"><div><h2>Un rinconcito para tus historias ✿</h2><p>Las lecturas no tienen prisa. Disfruta cada página.</p><div class="book-actions"><button class="btn primary" onclick="openAddBook()">＋ Añadir un libro</button><button class="btn ghost" onclick="setPage('seguimiento')">Registrar lectura</button></div></div><div class="hero-art">📚</div></div>
+ <div class="grid four"><div class="panel stat"><div class="emoji">📖</div><div class="big">${data.books.length}</div><div class="label">En tu biblioteca</div></div><div class="panel stat"><div class="emoji">🌷</div><div class="big">${done.length}</div><div class="label">Libros terminados</div></div><div class="panel stat"><div class="emoji">✧</div><div class="big">${totalPages().toLocaleString()}</div><div class="label">Páginas registradas</div></div><div class="panel stat"><div class="emoji">🎯</div><div class="big">${done.length}/${goal}</div><div class="label">Meta anual</div><div class="progress"><span style="width:${Math.min(100,p)}%"></span></div></div></div>
+ <div class="grid two" style="margin-top:18px"><section class="panel"><h3>Estoy leyendo</h3>${current.length?`<div class="book-grid">${current.map(bookCard).join('')}</div>`:emptyState('Todavía no tienes lecturas activas','Añade un libro y cambia su estado a “Leyendo”.')}</section><section class="panel"><h3>Actividad reciente</h3>${data.sessions.slice(-4).reverse().map(s=>`<div class="list-item"><div><b>${esc(s.bookTitle)}</b><div class="muted">${esc(s.date)} · ${s.pages||0} páginas · ${s.minutes||0} min</div></div><span>✦</span></div>`).join('')||emptyState('Tu registro está vacío','Tus sesiones aparecerán aquí.')}</section></div>
+ <section class="panel" style="margin-top:18px"><div class="section-head"><h3>Terminados recientemente</h3><button class="btn small ghost" onclick="setPage('biblioteca')">Ver biblioteca</button></div>${done.length?`<div class="book-grid">${done.slice(-6).reverse().map(bookCard).join('')}</div>`:emptyState('Aún no has terminado libros','Cada final será parte de tu historia.')}</section>`;
+}
+function emptyState(title,desc){return `<div class="empty"><div class="flower">✿</div><b>${title}</b><p>${desc}</p></div>`}
+function library(c){
+ let filters=['Todos','Leyendo','Por leer','Leído','Pausado','Abandonado','Favoritos','Wishlist'];
+ let books=data.books.filter(b=>filter==='Todos'||filter==='Favoritos'&&b.favorite||b.status===filter);
+ c.innerHTML=`<div class="filters"><input class="search" id="libSearch" placeholder="Buscar por título, autor, género…" oninput="filterBooks()"><button class="btn primary" onclick="openAddBook()">＋ Añadir</button></div><div class="chips">${filters.map(f=>`<button class="chip ${filter===f?'active':''}" onclick="filter='${f}';render()">${f}</button>`).join('')}</div><div id="bookResults" class="book-grid" style="margin-top:20px">${books.length?books.map(bookCard).join(''):emptyState('Tu biblioteca está esperando','Añade tu primer libro para comenzar.')}</div>`;
+}
+function filterBooks(){let q=document.getElementById('libSearch').value.toLowerCase(),res=data.books.filter(b=>(filter==='Todos'||filter==='Favoritos'&&b.favorite||b.status===filter)&&[b.title,b.author,b.genre,b.tags].join(' ').toLowerCase().includes(q));document.getElementById('bookResults').innerHTML=res.length?res.map(bookCard).join(''):emptyState('No encontramos libros','Prueba con otro término.')}
+function tracking(c){
+ let current=data.books.filter(b=>b.status==='Leyendo');
+ c.innerHTML=`<div class="grid two"><section class="panel"><h3>Mis lecturas activas</h3>${current.length?current.map(b=>`<div class="list-item"><div style="flex:1"><b>${esc(b.title)}</b><div class="muted">${esc(b.author||'')}</div><div class="progress"><span style="width:${pct(b)}%"></span></div><small>${b.current||0} de ${b.pages||'?'} páginas · ${pct(b)}%</small></div><button class="btn small" onclick="logPages('${b.id}')">＋ Páginas</button></div>`).join(''):emptyState('No tienes lecturas activas','Añade un libro y ponlo en estado “Leyendo”.')}</section><section class="panel timer"><h3>Temporizador lector</h3><select id="timerBook" onchange="timerBook=this.value"><option value="">Selecciona un libro</option>${current.map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join('')}</select><div class="timer-display" id="timerDisplay">${timeFmt(timerSecs)}</div><div class="book-actions" style="justify-content:center"><button class="btn primary" onclick="startTimer()">▶ Iniciar</button><button class="btn ghost" onclick="pauseTimer()">Ⅱ Pausar</button><button class="btn ghost" onclick="finishTimer()">■ Guardar sesión</button></div><p class="muted">Al guardar, puedes registrar páginas leídas.</p></section></div>
+ <section class="panel" style="margin-top:18px"><h3>Historial de sesiones</h3>${data.sessions.slice().reverse().map(s=>`<div class="list-item"><div><b>${esc(s.bookTitle)}</b><div class="muted">${esc(s.date)} · ${s.pages} páginas · ${s.minutes} minutos</div></div></div>`).join('')||emptyState('Todavía no hay sesiones','Tus sesiones se guardarán aquí.')}</section>`;
+}
+function diary(c){c.innerHTML=`<div class="actions" style="margin-bottom:16px"><button class="btn primary" onclick="newNote()">＋ Nueva entrada</button></div>${data.notes.slice().reverse().map(n=>`<div class="panel note-card"><div class="list-item" style="padding:0"><b>${esc(n.title||'Entrada sin título')}</b><small class="muted">${esc(n.date)}</small></div><p>${esc(n.body)}</p>${n.book?`<span class="tag">${esc(n.book)}</span>`:''}<div class="book-actions"><button class="btn small ghost" onclick="editNote('${n.id}')">Editar</button><button class="btn small ghost" onclick="deleteNote('${n.id}')">Eliminar</button></div></div>`).join('')||emptyState('Tu diario está en blanco','Guarda reseñas, citas, pensamientos y momentos favoritos.')}`}
+function more(c){c.innerHTML=`<div class="grid two"><div class="panel"><h3>Tu mundo lector ✿</h3><p class="muted">Un espacio para decorar, guardar favoritos y crear tu universo de libros.</p><div class="book-actions"><button class="btn" onclick="setPage('estanteria')">Estantería virtual</button><button class="btn" onclick="setPage('retos')">Retos y logros</button><button class="btn" onclick="setPage('rankings')">Rankings y crushes</button><button class="btn" onclick="setPage('wishlist')">Wishlist</button><button class="btn" onclick="setPage('calendario')">Calendario</button><button class="btn" onclick="setPage('papelera')">Papelera</button></div></div><div class="panel"><h3>Meta de lectura</h3><p>Tu meta anual: <b>${data.settings.goal} libros</b></p><div class="progress"><span style="width:${Math.min(100,finished().length/data.settings.goal*100)}%"></span></div><p class="muted">${finished().length} libros terminados de ${data.settings.goal}</p><button class="btn ghost" onclick="setPage('config')">Editar meta</button></div><div class="panel"><h3>Favoritos</h3><p>${data.books.filter(b=>b.favorite).length} libros guardados como favoritos</p><button class="btn ghost" onclick="filter='Favoritos';setPage('biblioteca')">Ver favoritos</button></div><div class="panel"><h3>Premios del año</h3><button class="btn ghost" onclick="newAward()">＋ Crear premio personal</button>${data.awards.map(a=>`<div class="list-item">${esc(a.category)}: <b>${esc(a.book||a.winner||'Sin ganador')}</b></div>`).join('')}</div></div>`}
+function stats(c){let byGenre={};data.books.forEach(b=>{if(b.genre)byGenre[b.genre]=(byGenre[b.genre]||0)+1});let average=data.books.filter(b=>b.rating).length?data.books.filter(b=>b.rating).reduce((a,b)=>a+b.rating,0)/data.books.filter(b=>b.rating).length:0;
+c.innerHTML=`<div class="grid four"><div class="panel stat"><div class="big">${finished().length}</div><div class="label">Terminados</div></div><div class="panel stat"><div class="big">${totalPages().toLocaleString()}</div><div class="label">Páginas registradas</div></div><div class="panel stat"><div class="big">${Math.round(data.sessions.reduce((a,s)=>a+(s.minutes||0),0)/60*10)/10}</div><div class="label">Horas registradas</div></div><div class="panel stat"><div class="big">${average.toFixed(1)} ★</div><div class="label">Calificación promedio</div></div></div><div class="grid two" style="margin-top:18px"><div class="panel"><h3>Libros por estado</h3>${['Leyendo','Por leer','Leído','Pausado','Abandonado'].map(s=>`<div class="list-item"><span>${s}</span><b>${data.books.filter(b=>b.status===s).length}</b></div>`).join('')}</div><div class="panel"><h3>Géneros</h3>${Object.entries(byGenre).map(([g,n])=>`<div class="list-item"><span>${esc(g)}</span><b>${n}</b></div>`).join('')||emptyState('Sin géneros registrados','Agrega un género en la ficha de un libro.')}</div></div><div class="panel" style="margin-top:18px"><h3>Reading Wrapped</h3><p>Tu resumen lector con ${finished().length} libros terminados y ${totalPages()} páginas registradas.</p><button class="btn" onclick="wrapped()">Crear resumen</button></div>`}
+function shelf(c){c.innerHTML=`<div class="panel"><div class="section-head"><h3>Mis estantes</h3><button class="btn small" onclick="addShelf()">＋ Estante</button></div><p class="muted">Arrastra los libros para reorganizarlos. Toca un libro para abrir su ficha.</p>${data.shelf.length?data.shelf.map(s=>`<div class="shelf"><h4>${esc(s.name)}</h4><div class="shelf-row" data-shelf="${s.id}" ondragover="event.preventDefault()" ondrop="dropShelf(event,'${s.id}')">${s.bookIds.map(id=>{let b=data.books.find(x=>x.id===id);return b?`<div class="shelf-book" draggable="true" ondragstart="dragBook(event,'${b.id}')" title="${esc(b.title)}" onclick="bookDetail('${b.id}')">${esc(b.title)}</div>`:''}).join('')}</div><div class="book-actions"><button class="btn small ghost" onclick="addToShelf('${s.id}')">Añadir libros</button><button class="btn small ghost" onclick="renameShelf('${s.id}')">Renombrar</button><button class="btn small ghost" onclick="deleteShelf('${s.id}')">Eliminar estante</button></div></div>`).join(''):emptyState('Tu estantería está vacía','Crea un estante y coloca tus libros favoritos.')}</div>`}
+let draggedBook=null;
+function dragBook(e,id){draggedBook=id;e.dataTransfer.setData('text/plain',id)}
+function dropShelf(e,sid){e.preventDefault();let id=e.dataTransfer.getData('text/plain')||draggedBook;if(!id)return;let s=data.shelf.find(x=>x.id===sid);if(s&&!s.bookIds.includes(id)){s.bookIds.push(id);save();render()}}
+function addShelf(){let n=prompt('Nombre de la estantería:');if(n){data.shelf.push({id:uid(),name:n,bookIds:[]});save();render()}}
+function renameShelf(id){let s=data.shelf.find(x=>x.id===id),n=prompt('Nuevo nombre:',s?.name||'');if(s&&n){s.name=n;save();render()}}
+function deleteShelf(id){if(confirm('¿Eliminar esta estantería? Los libros no se borrarán de tu biblioteca.')){data.shelf=data.shelf.filter(s=>s.id!==id);save();render()}}
+function addToShelf(id){let s=data.shelf.find(x=>x.id===id);if(!s)return;let opts=data.books.map((b,i)=>`${i+1}. ${b.title}`).join('\n');let n=prompt('Escribe los números de libros separados por coma para añadir:\n'+opts);if(!n)return;n.split(',').forEach(x=>{let b=data.books[Number(x.trim())-1];if(b&&!s.bookIds.includes(b.id))s.bookIds.push(b.id)});save();render()}
+function challenges(c){c.innerHTML=`<div class="panel"><div class="section-head"><h3>Mis retos</h3><button class="btn" onclick="addChallenge()">＋ Crear reto</button></div>${data.challenges.map(ch=>`<div class="list-item"><div style="flex:1"><b>${esc(ch.name)}</b><div class="muted">${ch.current||0} / ${ch.target} ${esc(ch.unit)}</div><div class="progress"><span style="width:${Math.min(100,(ch.current||0)/ch.target*100)}%"></span></div></div><button class="btn small ghost" onclick="updateChallenge('${ch.id}')">＋</button><button class="btn small ghost" onclick="removeChallenge('${ch.id}')">×</button></div>`).join('')||emptyState('Sin retos por ahora','Crea un reto de libros, páginas, sagas o cualquier meta.') }<hr><h3>Logros</h3>${[['Primera lectura',finished().length>=1],['10 libros',finished().length>=10],['50 libros',finished().length>=50],['Mil páginas',totalPages()>=1000],['Primera sesión',data.sessions.length>=1]].map(([n,ok])=>`<div class="list-item"><span>${ok?'🏅':'🔒'} ${n}</span><b>${ok?'Desbloqueado':'Pendiente'}</b></div>`).join('')}</div>`}
+function addChallenge(){let name=prompt('Nombre del reto:');if(!name)return;let target=Number(prompt('¿Cuál es tu meta numérica?',12));let unit=prompt('Unidad (libros, páginas, días, etc.):','libros')||'unidades';data.challenges.push({id:uid(),name,target:target||1,unit,current:0});save();render()}
+function updateChallenge(id){let ch=data.challenges.find(x=>x.id===id);if(!ch)return;ch.current=Math.min(ch.target,Number(ch.current||0)+Number(prompt('¿Cuánto quieres sumar?',1)||0));save();render()}
+function removeChallenge(id){data.challenges=data.challenges.filter(x=>x.id!==id);save();render()}
+function rankings(c){c.innerHTML=`<div class="grid two"><div class="panel"><h3>Rankings personales</h3><button class="btn" onclick="addRanking()">＋ Crear ranking</button>${data.rankings.map(r=>`<div class="list-item"><div><b>${esc(r.name)}</b><div class="muted">${(r.items||[]).length} elementos</div></div><button class="btn small ghost" onclick="editRanking('${r.id}')">Editar</button><button class="btn small ghost" onclick="removeRanking('${r.id}')">×</button></div>`).join('')||emptyState('Todavía no tienes rankings','Crea rankings de personajes, parejas, villanos o lo que se te ocurra.')}</div><div class="panel"><h3>Crushes literarios ♡</h3><button class="btn" onclick="addCrush()">＋ Añadir crush</button>${data.crushes.map(x=>`<div class="list-item"><div><b>${esc(x.name)}</b><div class="muted">${esc(x.book||'')}</div><small>${esc(x.why||'')}</small></div><button class="btn small ghost" onclick="deleteCrush('${x.id}')">×</button></div>`).join('')||emptyState('Sin crushes registrados','Aquí puedes guardar tus personajes favoritos.')}</div></div>`}
+function addRanking(){let name=prompt('Nombre del ranking:');if(name){data.rankings.push({id:uid(),name,items:[]});save();render()}}
+function editRanking(id){let r=data.rankings.find(x=>x.id===id);if(!r)return;let txt=prompt('Elementos, uno por línea. Puedes cambiar el orden:',(r.items||[]).join('\n'));if(txt!==null){r.items=txt.split('\n').map(x=>x.trim()).filter(Boolean);save();render()}}
+function removeRanking(id){data.rankings=data.rankings.filter(x=>x.id!==id);save();render()}
+function addCrush(){let name=prompt('Nombre del personaje:');if(!name)return;let book=prompt('Libro de origen:')||'',why=prompt('¿Por qué te gusta?')||'';data.crushes.push({id:uid(),name,book,why});save();render()}
+function deleteCrush(id){data.crushes=data.crushes.filter(x=>x.id!==id);save();render()}
+function wishlist(c){c.innerHTML=`<div class="panel"><div class="section-head"><h3>Libros que quiero</h3><button class="btn" onclick="addWish()">＋ Añadir</button></div>${data.wishlist.length?`<div class="book-grid">${data.wishlist.map(w=>`<div class="book-card"><div class="cover c5" onclick="editWish('${w.id}')"><span>${esc(w.title)}</span></div><div class="book-title">${esc(w.title)}</div><div class="book-author">${esc(w.author||'')}</div><div class="book-meta">${esc(w.priority||'Sin prioridad')}</div><div class="book-actions"><button class="btn small" onclick="moveWish('${w.id}')">＋ A biblioteca</button><button class="btn small ghost" onclick="deleteWish('${w.id}')">Eliminar</button></div></div>`).join('')}</div>`:emptyState('Tu wishlist está vacía','Guarda aquí los libros que quieres leer o comprar.')}</div>`}
+function addWish(){let title=prompt('Título del libro:');if(!title)return;let author=prompt('Autor:')||'',priority=prompt('Prioridad (Alta, Media, Baja):','Media')||'Media';data.wishlist.push({id:uid(),title,author,priority});save();render()}
+function editWish(id){let w=data.wishlist.find(x=>x.id===id);if(w){let title=prompt('Título:',w.title);if(title!==null){w.title=title;w.author=prompt('Autor:',w.author)||w.author;save();render()}}}
+function moveWish(id){let w=data.wishlist.find(x=>x.id===id);if(!w)return;data.books.push({id:uid(),title:w.title,author:w.author,status:'Por leer',favorite:false,current:0,pages:0,color:Math.floor(Math.random()*8)});data.wishlist=data.wishlist.filter(x=>x.id!==id);save();render();toast('Libro añadido a tu biblioteca')}
+function deleteWish(id){data.wishlist=data.wishlist.filter(x=>x.id!==id);save();render()}
+function calendar(c){let now=new Date(),year=now.getFullYear(),month=now.getMonth(),first=new Date(year,month,1).getDay(),days=new Date(year,month+1,0).getDate();let readDates=new Set(data.sessions.map(s=>s.date));let dateStr=d=>`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;c.innerHTML=`<div class="panel"><h3>${now.toLocaleString('es',{month:'long',year:'numeric'})}</h3><div class="calendar">${['D','L','M','M','J','V','S'].map(x=>`<div class="head">${x}</div>`).join('')}${Array.from({length:first},()=>'<div></div>').join('')}${Array.from({length:days},(_,i)=>`<div class="${readDates.has(dateStr(i+1))?'read':''}">${i+1}</div>`).join('')}</div><p class="muted">Los días marcados indican sesiones registradas. ${readDates.size} días con actividad guardada.</p></div>`}
+function trash(c){c.innerHTML=`<div class="panel"><div class="section-head"><h3>Libros eliminados</h3><button class="btn small ghost" onclick="emptyTrash()">Vaciar papelera</button></div>${data.trash.length?data.trash.map(b=>`<div class="list-item"><div><b>${esc(b.title)}</b><div class="muted">${esc(b.author||'')}</div></div><button class="btn small" onclick="restoreBook('${b.id}')">Restaurar</button><button class="btn small ghost" onclick="permanentDelete('${b.id}')">Eliminar definitivamente</button></div>`).join(''):emptyState('La papelera está vacía','Los libros que elimines aparecerán aquí para poder recuperarlos.')}</div>`}
+function restoreBook(id){let b=data.trash.find(x=>x.id===id);if(b){data.books.push(b);data.trash=data.trash.filter(x=>x.id!==id);save();render();toast('Libro restaurado')}}
+function permanentDelete(id){if(confirm('¿Eliminar este libro para siempre?')){data.trash=data.trash.filter(x=>x.id!==id);save();render()}}
+function emptyTrash(){if(confirm('¿Vaciar la papelera y eliminar sus libros definitivamente?')){data.trash=[];save();render()}}
+function settings(c){c.innerHTML=`<div class="grid two"><div class="panel"><h3>Apariencia</h3><div class="list-item"><span>Tema</span><select onchange="setTheme(this.value)"><option value="light" ${data.settings.theme==='light'?'selected':''}>Claro</option><option value="dark" ${data.settings.theme==='dark'?'selected':''}>Oscuro</option></select></div><div class="list-item"><span>Meta anual de libros</span><input type="number" min="1" max="500" value="${data.settings.goal}" onchange="setGoal(this.value)" style="width:100px"></div></div><div class="panel"><h3>Datos y respaldo</h3><p class="muted">La app guarda automáticamente un respaldo local de recuperación en este mismo navegador. Para mover tus datos a otro dispositivo, exporta un archivo y luego impórtalo allí. La sincronización en la nube entre computadora y teléfono aún requiere configurar una cuenta y base de datos.</p><div class="book-actions"><button class="btn" onclick="exportData()">Exportar respaldo</button><label class="btn ghost" for="importFile">Importar respaldo</label><input type="file" id="importFile" accept=".json" onchange="importData(event)" hidden></div><hr><button class="btn ghost" onclick="resetData()">Borrar todos mis datos</button></div><div class="panel"><h3>Acerca de</h3><p>Mi Rincón Lector · versión inicial</p><p class="muted">Organizador privado de lectura. No contiene lector de libros electrónicos.</p></div><div class="panel"><h3>Privacidad</h3><p>Esta versión guarda los datos en este navegador y dispositivo. No hay sincronización en nube ni inicio de sesión conectado todavía.</p></div></div>`}
+function setTheme(t){data.settings.theme=t;document.documentElement.dataset.theme=t==='dark'?'dark':'';save()}
+function setGoal(v){data.settings.goal=Math.max(1,Number(v)||24);save();toast('Meta actualizada')}
+function openAddBook(){
+window.selectedBookCover='';
+window.onlineBookResults=[];
+document.getElementById('modal').innerHTML=`<h2>Añadir libro ✿</h2>
+<div class="panel" style="margin-bottom:15px"><h3>Buscar libro en internet</h3><div class="filters"><input id="bookLookup" class="search" placeholder="Título o autor…" onkeydown="if(event.key==='Enter'){event.preventDefault();searchBookOnline()}"><button class="btn primary" type="button" onclick="searchBookOnline()">Buscar</button></div><div id="bookSearchResults" class="muted">Busca por título o autor para encontrar el libro con su portada y datos. Se consultan dos catálogos.</div></div>
+<form id="bookForm"><div class="formgrid"><label class="full">Portada (si lo añades manualmente)<input id="manualCover" type="file" accept="image/*"><div id="manualCoverPreview" class="muted" style="font-size:12px">Puedes elegir una imagen de tu teléfono o computadora. No necesitas URL.</div></label><label>Título *<input name="title" required placeholder="Nombre del libro"></label><label>Autor<input name="author" placeholder="Autor/a"></label><label>Estado<select name="status"><option>Por leer</option><option>Leyendo</option><option>Leído</option><option>Pausado</option><option>Abandonado</option></select></label><label>Páginas totales<input name="pages" type="number" min="0" placeholder="Se rellena al buscar"></label><label>Página actual<input name="current" type="number" min="0" value="0"></label><label>Género<input name="genre" placeholder="Se rellena al buscar"></label><label>ISBN<input name="isbn"></label><label>Idioma<input name="language" placeholder="Se rellena al buscar"></label><label>Fecha de inicio<input name="start" type="date"></label><label>Fecha de fin<input name="end" type="date"></label><label>Calificación (0-5)<input name="rating" type="number" min="0" max="5" step=".5"></label><label>Tags / tropes<input name="tags" placeholder="Enemies to lovers, slow burn…"></label><label class="full">Notas<textarea name="notes" placeholder="Algo que quieras guardar sobre este libro…"></textarea></label></div><div class="modal-actions"><button type="button" class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn primary" type="submit">Guardar libro</button></div></form>`;
+showModal();
+const manualCover=document.getElementById('manualCover');
+manualCover.onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{window.selectedBookCover=await compressCover(file);document.getElementById('manualCoverPreview').innerHTML=`<img src="${window.selectedBookCover}" alt="Vista previa de portada" style="max-height:170px;max-width:115px;object-fit:contain;border-radius:8px;display:block;margin-top:8px"><span>Portada lista ✓</span>`}catch{document.getElementById('manualCoverPreview').textContent='No se pudo cargar esa imagen. Prueba con otra.'}};
+document.getElementById('bookForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target),b={id:uid(),title:f.get('title').trim(),author:f.get('author'),status:f.get('status'),pages:Number(f.get('pages')||0),current:Number(f.get('current')||0),genre:f.get('genre'),isbn:f.get('isbn'),language:f.get('language'),start:f.get('start'),end:f.get('end'),rating:Number(f.get('rating')||0),tags:f.get('tags'),notes:f.get('notes'),favorite:false,color:Math.floor(Math.random()*8),coverUrl:window.selectedBookCover||''};data.books.push(b);window.selectedBookCover='';save();closeModal();render();toast('Libro guardado en tu biblioteca')}
+}
+function compressCover(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const img=new Image();img.onerror=reject;img.onload=()=>{const maxW=420,maxH=650,scale=Math.min(1,maxW/img.width,maxH/img.height),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL('image/jpeg',0.72))};img.src=reader.result};reader.readAsDataURL(file)})}
+async function searchBookOnline(){
+ const q=document.getElementById('bookLookup')?.value.trim(),out=document.getElementById('bookSearchResults');
+ if(!q){out.innerHTML='Escribe el título o el autor para buscar.';return}
+ out.innerHTML='Buscando en Google Books…';
+ let normalized=[];
+ try{
+  const resp=await fetch('https://www.googleapis.com/books/v1/volumes?q='+encodeURIComponent(q)+'&maxResults=20&printType=books');
+  if(resp.ok){const dataApi=await resp.json();normalized=(dataApi.items||[]).map(it=>{const v=it.volumeInfo||{};return{title:v.title||'',authors:v.authors||[],publisher:v.publisher||'',pageCount:v.pageCount||0,categories:v.categories||[],isbn:(v.industryIdentifiers||[]).map(x=>x.identifier),language:v.language||'',cover:(v.imageLinks?.thumbnail||v.imageLinks?.smallThumbnail||'').replace('http://','https://'),source:'Google Books'}}).filter(x=>x.title)}
+ }catch(e){/* fall through to second catalog */}
+ if(!normalized.length){out.innerHTML='Google Books no respondió. Probando otro catálogo…';try{const resp=await fetch('https://openlibrary.org/search.json?q='+encodeURIComponent(q)+'&fields=key,title,author_name,first_publish_year,number_of_pages_median,isbn,cover_i&limit=20');if(resp.ok){const ol=await resp.json();normalized=(ol.docs||[]).map(d=>({title:d.title||'',authors:d.author_name||[],publisher:d.first_publish_year?String(d.first_publish_year):'',pageCount:d.number_of_pages_median||0,categories:[],isbn:d.isbn?.slice(0,1)||[],language:'',cover:d.cover_i?'https://covers.openlibrary.org/b/id/'+d.cover_i+'-M.jpg':'',source:'Open Library'})).filter(x=>x.title)}}catch(e){/* both catalogs unavailable */}}
+ if(!normalized.length){out.innerHTML='No logramos obtener resultados de los catálogos. Esto puede ser un bloqueo de conexión del navegador o temporal del servicio. Intenta nuevamente más tarde, o añade el libro manualmente y selecciona su portada desde tus archivos.';return}
+ window.onlineBookResults=normalized;
+ out.innerHTML=normalized.map((v,i)=>`<div class="list-item" style="align-items:flex-start"><div style="width:60px;flex:none">${v.cover?`<img src="${esc(v.cover)}" style="width:60px;max-height:95px;object-fit:cover;border-radius:6px" alt="Portada" onerror="this.style.display='none'">`:`<div class="cover" style="width:60px;height:90px;font-size:9px">${esc(v.title)}</div>`}</div><div style="flex:1;min-width:0"><b>${esc(v.title)}</b><div class="muted">${esc(v.authors.join(', ')||'Autor desconocido')}</div><small class="muted">${esc(v.publisher||'')} ${v.pageCount?`· ${v.pageCount} páginas`:''} · ${esc(v.source)}</small><div><button class="btn small" style="margin-top:7px" onclick="selectOnlineBook(${i})">Usar este libro</button></div></div></div>`).join('');
+}
+function selectOnlineBook(i){
+ const v=window.onlineBookResults?.[i],f=document.getElementById('bookForm');if(!v||!f)return;
+ f.elements.title.value=v.title||'';f.elements.author.value=(v.authors||[]).join(', ');f.elements.pages.value=v.pageCount||'';f.elements.genre.value=(v.categories||[]).join(', ');f.elements.isbn.value=(v.isbn||[]).join(', ');f.elements.language.value=v.language||'';window.selectedBookCover=v.cover||'';
+ const preview=document.getElementById('manualCoverPreview');if(preview)preview.innerHTML=v.cover?`<img src="${esc(v.cover)}" alt="Portada seleccionada" style="max-height:170px;max-width:115px;object-fit:contain;border-radius:8px;display:block;margin-top:8px"><span>Portada encontrada ✓</span>`:'Libro seleccionado. No se encontró portada, puedes subir una imagen manualmente.';
+ document.getElementById('bookSearchResults').innerHTML=`<p style="color:var(--wine);font-weight:600">✓ Datos seleccionados (${esc(v.source)}). Revisa el formulario y guarda.</p>`;
+}
+function bookDetail(id){let b=data.books.find(x=>x.id===id);if(!b)return;document.getElementById('modal').innerHTML=`${b.coverUrl?`<img src="${esc(b.coverUrl)}" alt="Portada" style="width:110px;border-radius:10px;float:left;margin:0 16px 12px 0">`:''}<h2>${esc(b.title)}</h2><p class="muted">${esc(b.author||'')}</p><div class="formgrid"><label>Estado<select id="detailStatus">${['Por leer','Leyendo','Leído','Pausado','Abandonado'].map(s=>`<option ${s===b.status?'selected':''}>${s}</option>`).join('')}</select></label><label>Páginas totales<input id="detailPages" type="number" value="${b.pages||0}"></label><label>Página actual<input id="detailCurrent" type="number" value="${b.current||0}"></label><label>Género<input id="detailGenre" value="${esc(b.genre||'')}"></label><label>Calificación<input id="detailRating" type="number" min="0" max="5" step=".5" value="${b.rating||0}"></label><label>Tags / tropes<input id="detailTags" value="${esc(b.tags||'')}"></label><label>Fecha inicio<input id="detailStart" type="date" value="${b.start||''}"></label><label>Fecha fin<input id="detailEnd" type="date" value="${b.end||''}"></label><label class="full">Reseña / notas<textarea id="detailNotes">${esc(b.notes||'')}</textarea></label></div><div class="progress"><span style="width:${pct(b)}%"></span></div><small class="muted">${pct(b)}% completado</small><div class="book-actions"><button class="btn" onclick="saveBookDetail('${id}')">Guardar cambios</button><button class="btn ghost" onclick="toggleFav('${id}')">${b.favorite?'Quitar favorito':'♡ Favorito'}</button><button class="btn ghost" onclick="deleteBook('${id}')">Mover a papelera</button><button class="btn ghost" onclick="closeModal()">Cerrar</button></div>`;
+showModal()}
+function saveBookDetail(id){let b=data.books.find(x=>x.id===id);if(!b)return;b.status=document.getElementById('detailStatus').value;b.pages=Number(document.getElementById('detailPages').value||0);b.current=Number(document.getElementById('detailCurrent').value||0);b.genre=document.getElementById('detailGenre').value;b.rating=Number(document.getElementById('detailRating').value||0);b.tags=document.getElementById('detailTags').value;b.start=document.getElementById('detailStart').value;b.end=document.getElementById('detailEnd').value;b.notes=document.getElementById('detailNotes').value;if(b.status==='Leído'&&!b.end)b.end=new Date().toISOString().slice(0,10);save();closeModal();render();toast('Cambios guardados')}
+function toggleFav(id){let b=data.books.find(x=>x.id===id);if(b){b.favorite=!b.favorite;save();bookDetail(id)}}
+function deleteBook(id){let b=data.books.find(x=>x.id===id);if(b){data.trash.push({...b,deletedAt:new Date().toISOString()});data.books=data.books.filter(x=>x.id!==id);data.shelf.forEach(s=>s.bookIds=s.bookIds.filter(x=>x!==id));save();closeModal();render();toast('Movido a papelera')}
+}
+function logPages(id){let b=data.books.find(x=>x.id===id);if(!b)return;let p=Number(prompt(`¿Cuántas páginas leíste de ${b.title}?`,10)||0);if(p<=0)return;b.current=Math.min(b.pages||Infinity,(b.current||0)+p);let date=prompt('Fecha de lectura (AAAA-MM-DD):',new Date().toISOString().slice(0,10))||new Date().toISOString().slice(0,10);data.sessions.push({id:uid(),bookId:id,bookTitle:b.title,pages:p,minutes:0,date});if(!data.streakDays.includes(date))data.streakDays.push(date);if(b.pages&&b.current>=b.pages){b.status='Leído';b.end=date}save();render();toast('Progreso registrado')}
+function newNote(){noteForm()}
+function editNote(id){let n=data.notes.find(x=>x.id===id);if(n)noteForm(n)}
+function noteForm(n={}){document.getElementById('modal').innerHTML=`<h2>${n.id?'Editar entrada':'Nueva entrada'}</h2><form id="noteForm"><div class="formgrid"><label class="full">Título<input name="title" value="${esc(n.title||'')}" placeholder="Un pensamiento…"></label><label>Libro relacionado<input name="book" value="${esc(n.book||'')}"></label><label>Fecha<input name="date" type="date" value="${n.date||new Date().toISOString().slice(0,10)}"></label><label class="full">Entrada<textarea name="body" required>${esc(n.body||'')}</textarea></label></div><div class="modal-actions"><button class="btn ghost" type="button" onclick="closeModal()">Cancelar</button><button class="btn primary">Guardar</button></div></form>`;showModal();document.getElementById('noteForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target),obj={id:n.id||uid(),title:f.get('title'),book:f.get('book'),date:f.get('date'),body:f.get('body')};if(n.id)data.notes=data.notes.map(x=>x.id===n.id?obj:x);else data.notes.push(obj);save();closeModal();render()}}
+function deleteNote(id){if(confirm('¿Eliminar esta entrada?')){data.notes=data.notes.filter(x=>x.id!==id);save();render()}}
+function startTimer(){let select=document.getElementById('timerBook');timerBook=select?.value||timerBook;if(timerInterval)return;if(!timerBook){toast('Selecciona un libro para la sesión');return}timerInterval=setInterval(()=>{timerSecs++;let el=document.getElementById('timerDisplay');if(el)el.textContent=timeFmt(timerSecs)},1000);toast('Sesión iniciada')}
+function pauseTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;toast('Temporizador pausado')}}
+function finishTimer(){pauseTimer();if(timerSecs<=0){toast('No hay tiempo registrado');return}let b=data.books.find(x=>x.id===timerBook),pages=Number(prompt('¿Cuántas páginas leíste durante la sesión?',0)||0),date=new Date().toISOString().slice(0,10);if(b&&pages>0){b.current=Math.min(b.pages||Infinity,(b.current||0)+pages);if(b.pages&&b.current>=b.pages){b.status='Leído';b.end=date}}if(b){data.sessions.push({id:uid(),bookId:b.id,bookTitle:b.title,pages,minutes:Math.round(timerSecs/60),date});if(!data.streakDays.includes(date))data.streakDays.push(date)}save();timerSecs=0;timerBook=null;render();toast('Sesión guardada')}
+function timeFmt(n){return `${String(Math.floor(n/3600)).padStart(2,'0')}:${String(Math.floor(n/60)%60).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`}
+function newAward(){let category=prompt('Categoría del premio:');if(!category)return;let book=prompt('Ganador / libro / personaje:')||'';data.awards.push({category,book});save();render()}
+function wrapped(){let msg=`Mi Reading Wrapped ✿\\nLibros terminados: ${finished().length}\\nPáginas registradas: ${totalPages()}\\nHoras de lectura: ${Math.round(data.sessions.reduce((a,s)=>a+(s.minutes||0),0)/60*10)/10}\\n¡Este fue mi año entre páginas!`;alert(msg)}
+function exportData(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mi-rincon-lector-respaldo.json';a.click();URL.revokeObjectURL(a.href);toast('Respaldo descargado')}
+function importData(e){let file=e.target.files[0];if(!file)return;let reader=new FileReader();reader.onload=()=>{try{let d=JSON.parse(reader.result);if(!d.books||!Array.isArray(d.books))throw 0;if(confirm('Importar respaldo reemplazará los datos actuales. ¿Continuar?')){data={...initial,...d};save();render();toast('Respaldo importado')}}catch{alert('El archivo no parece un respaldo válido')}};reader.readAsText(file)}
+function resetData(){if(confirm('¿Seguro que deseas borrar todos los datos?'))if(confirm('Esta acción no se puede deshacer. ¿Confirmas?')){localStorage.removeItem(KEY);data=structuredClone(initial);render();toast('Datos borrados')}}
+function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36)}
+function openMobileMore(){const options=[['mimundo','✿','Mi mundo lector'],['estanteria','▥','Estantería virtual'],['retos','☆','Retos y logros'],['rankings','♡','Rankings y crushes'],['wishlist','♧','Lista de deseos'],['calendario','▦','Calendario'],['estadisticas','▤','Estadísticas'],['papelera','⌫','Papelera'],['config','⚙','Configuración']];document.getElementById('modal').innerHTML=`<h2>Más opciones ✿</h2><p class="muted">Todas tus secciones lectoras en un solo lugar.</p>${options.map(([key,icon,label])=>`<button class="list-item" style="width:100%;background:transparent;text-align:left" onclick="closeModal();setPage('${key}')"><span>${icon} &nbsp; ${label}</span><span>›</span></button>`).join('')}<div class="modal-actions"><button class="btn ghost" onclick="closeModal()">Cerrar</button></div>`;showModal()}
+function showModal(){document.getElementById('modalBackdrop').classList.add('show')}
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page==='moremenu'){openMobileMore();return}setPage(b.dataset.page)}));
+document.documentElement.dataset.theme=data.settings.theme==='dark'?'dark':'';
+render();
+</script>
+</body>
+</html>
